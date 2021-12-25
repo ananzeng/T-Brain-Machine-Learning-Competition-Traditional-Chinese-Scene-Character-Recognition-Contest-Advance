@@ -7,11 +7,12 @@ import time
 import cv2
 import tqdm
 import numpy as np
-
+import os
 from detectron2.config import get_cfg
 from detectron2.data.detection_utils import read_image
 from detectron2.utils.logger import setup_logger
-
+from predictor import VisualizationDemo
+from detectron2.engine import DefaultPredictor
 from predictor import VisualizationDemo
 
 # constants
@@ -111,6 +112,15 @@ def save_result_to_txt(txt_save_path,prediction,polygons):
 
     file.close()
 
+def order_points_old(pts):
+	rect = np.zeros((4, 2), dtype="float32")
+	s = pts.sum(axis=1)
+	rect[0] = pts[np.argmin(s)]
+	rect[2] = pts[np.argmax(s)]
+	diff = np.diff(pts, axis=1)
+	rect[1] = pts[np.argmin(diff)]
+	rect[3] = pts[np.argmax(diff)]
+	return rect
 
 if __name__ == "__main__":
 
@@ -118,27 +128,92 @@ if __name__ == "__main__":
 
     cfg = setup_cfg(args)
     detection_demo = VisualizationDemo(cfg)
-
+    predictor = DefaultPredictor(cfg)
     test_images_path = args.input
     output_path = args.output
-
+    Character = ["text","0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
+            "a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"]
     start_time_all = time.time()
     img_count = 0
+    aaa = 0
+    out_dir_img = os.path.join("test_ctw1500", "img")
+    out_dir_yolo = os.path.join("test_ctw1500", "yolo")
+    if not os.path.isdir(out_dir_img):
+        os.mkdir(out_dir_img)
+    if not os.path.isdir(out_dir_yolo):
+        os.mkdir(out_dir_yolo)
     for i in glob.glob(test_images_path):
-        print(i)
+        #print(i)
+        name = i.split("/")[-1][:-4]
         img_name = os.path.basename(i)
         img_save_path = output_path + img_name.split('.')[0] + '.jpg'
         img = cv2.imread(i)
+        img_1 = img.copy()
         start_time = time.time()
-  
-        prediction, vis_output, polygons = detection_demo.run_on_image(img)
 
-        txt_save_path = output_path + 'res_img' + img_name.split('.')[0] + '.txt'
-        save_result_to_txt(txt_save_path,prediction,polygons)
+        prediction, vis_output, polygons = detection_demo.run_on_image(img)
+        outputs = predictor(img)
+        #print("outputs", outputs)
+        bbox = outputs['instances'].pred_boxes.to("cpu")
+        classes = outputs['instances'].pred_classes.to("cpu").numpy()
+        mask = outputs['instances'].pred_masks.to("cpu").numpy()
+        score = outputs['instances'].scores.to("cpu").numpy()
+        for index, i in enumerate(bbox):
+            pts = np.array(i, np.int32)
+            if classes[index]==0:
+                file_mask = 1 * np.array(mask[index]).astype('uint8')
+                file_mask_copy = file_mask.copy()
+                contours, hierarchy = cv2.findContours(file_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                if len(contours) == 1:
+                    order = 0
+                else:
+                    area_temp = []
+                    for i in range(len(contours)):
+                        print(name)
+                        aaa+=1
+                        area1 = cv2.contourArea(contours[i])
+                        area_temp.append(area1)
+                        print("面積", area1)
+            print("order", np.argmax(np.array(area_temp)))
+            order = np.argmax(np.array(area_temp))
+            rect = cv2.minAreaRect(contours[order])
+            box = cv2.boxPoints(rect)
+            box = order_points_old(box)
+            box = np.int0(box)
+            cv2.rectangle(img, (pts[0], pts[1]), (pts[2], pts[3]), (0, 255, 0), 2)
+            for index1, i in enumerate(box):
+              cv2.putText(img, str(index1), (np.array(i)[0], np.array(i)[1]), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 1, cv2.LINE_AA)
+            str_format = name+"_"+str(box[1][0])+"_"+str(box[1][1])+"_"+str(box[2][0])+"_"+str(box[2][1])+"_"+str(box[3][0])+"_"+str(box[3][1])+"_"+str(box[0][0])+"_"+str(box[0][1])+"_"+str(score[index])
+            print("比賽格式："+str_format)
+            cv2.polylines(img=img, pts=[box], isClosed=True, color=(255, 0, 0), thickness=2)
+            file_mask_copy = file_mask_copy[pts[1]:pts[3] , pts[0]: pts[2]]
+
+            file_mask_copy1 = np.expand_dims(file_mask_copy, axis=2)
+            file_mask_copy2 = np.concatenate((file_mask_copy1, file_mask_copy1, file_mask_copy1), axis=-1)
+            det = cv2.multiply(img_1[pts[1]:pts[3] , pts[0]: pts[2]], file_mask_copy2)
+
+            (h, w, d) = det.shape # 讀取圖片大小
+
+            pts2 = np.float32([[0, 0], [w, 0], [w, h], [0, h]])
+            pts2 = pts2.astype("float32")
+            box = box.astype("float32")
+            matrix = cv2.getPerspectiveTransform(box, pts2)
+            result = cv2.warpPerspective(img_1, matrix, (w, h)) 
+            if det.shape[0] > det.shape[1] and det.shape[0] // det.shape[1] > 2:
+              cv2.imwrite(os.path.join("test_ctw1500", "yolo", str_format+".png"), result)    
+            else:
+              cv2.imwrite(os.path.join("test_ctw1500", "img", str_format+".png"), result) 
+
+        img_save_path_my = output_path + img_name.split('.')[0] + '_my.jpg'
+        cv2.imwrite(img_save_path_my, img)
+
+        #txt_save_path = output_path + 'res_' + img_name.split('.')[0] + '.txt'
+        #save_result_to_txt(txt_save_path,prediction,polygons)
 
         print("Time: {:.2f} s / img".format(time.time() - start_time))
         vis_output.save(img_save_path)
         img_count += 1
     print("Average Time: {:.2f} s /img".format((time.time() - start_time_all) / img_count))
-
-
+    print("結束!")
+    print("yolo資料夾有", len(os.listdir(os.path.join("test_ctw1500", "yolo"))))
+    print("img資料夾有", len(os.listdir(os.path.join("test_ctw1500", "img"))))
