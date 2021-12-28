@@ -6,7 +6,7 @@ CMD執行 python detect.py --weights last.pt --save-txt
 
 執行完後即可生成照順序排的個別中文單字
 
-下載last.pt複製至 yolov5資料夾下
+下載[last.pt](https://drive.google.com/file/d/1Aq32QROGIP8976485F_xF49RPA1j40Cl/view?usp=sharing "last.pt")複製至 yolov5資料夾下
 
 輸入圖片放置在yolov5\data\images 內
 
