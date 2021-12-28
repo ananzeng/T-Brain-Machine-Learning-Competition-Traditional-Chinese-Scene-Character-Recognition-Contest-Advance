@@ -1,7 +1,7 @@
 # T-Brain-Machine-Learning-Competition-Traditional-Chinese-Scene-Character-Recognition-Contest-Advance
-繁體中文場景文字辨識競賽－高階賽：複雜街景之文字定位與辨識
-步驟一 先至TextFuseNet資料夾產生detection結果
-主要的資料夾位於mmocr/work_dir
+繁體中文場景文字辨識競賽－高階賽：複雜街景之文字定位與辨識  
+步驟一 先至TextFuseNet資料夾產生detection結果  
+主要的資料夾位於mmocr/work_dir  
 下載SAR預訓練[模型](https://download.openmmlab.com/mmocr/textrecog/sar/sar_r31_parallel_decoder_chineseocr_20210507-b4be8214.pth "模型")至mmocr/work_dir
 ## 資料夾介紹:
 **mmocr/work_dir/img**
