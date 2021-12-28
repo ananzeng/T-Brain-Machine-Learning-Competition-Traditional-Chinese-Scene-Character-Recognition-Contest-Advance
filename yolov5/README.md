@@ -10,4 +10,4 @@ CMD執行 python detect.py --weights last.pt --save-txt
 
 輸入圖片放置在yolov5\data\images 內
 
-產生的字元級分割會在yolov5\runs\detect\exp2\order_imgs 內
+產生的字元級分割會在yolov5\runs\detect\exp2\ 內
