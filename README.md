@@ -41,7 +41,7 @@ yolov5/data/images
 **步驟二** 複製TextFuseNet/test_ctw1500/img  至 mmocr/work_dir/ 並在mmocr資料夾內執行 1.py  
 **步驟三** 複製TextFuseNet/test_ctw1500/yolo/ 至 yolov5/data/images 產生直式文字字元級分割結果 詳細可[參考](https://github.com/ananzeng/T-Brain-Machine-Learning-Competition-Traditional-Chinese-Scene-Character-Recognition-Contest-Advance/blob/main/yolov5/README.md "參考")  
 **步驟四** 將產生的order_imgs 資料夾複製到 mmocr/work_dir/ 並在mmocr資料夾內執行 2.py  
-**步驟五** 執行 3.py  
+**步驟五** 在mmocr資料夾內執行 3.py  
 至此步驟所有的字元辨識已結束  
 **步驟六** 執行 1_csv.py && 2_csv.py && 3_csv.py  
 **步驟七** 因輸出有逗點沒消除因此csv檔輸出的逗號分隔檔有亂碼以及未分段的狀況，競賽期間沒發現，因此傳送email給比賽方查詢哪裡的問題，得知問題後手動刪除有問題的地方。 最終輸出為手動將output.csv, output1.csv, output2.csv 結合  
