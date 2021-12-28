@@ -1,4 +1,4 @@
-本 text detection 部分參考 [TextFuseNet](https://github.com/ying09/TextFuseNet "TextFuseNet")，使用作者提供的ctw1500權重做text detection預測，權重下載[網址](https://drive.google.com/drive/folders/18Ll-3bAmi4CR2eGTuM-j6fkMrSAaBV4Z?usp=sharing "網址")，下載完的 model_ic15_r101.pth 複製到       TextFuseNet/out_dir_r101/icdar2015_model/資料夾中，待檢測資料放到 TextFuseNet/input_images 中
+本 text detection 部分參考 [TextFuseNet](https://github.com/ying09/TextFuseNet "TextFuseNet")，使用作者提供的ctw1500權重做text detection預測，權重下載[網址](https://drive.google.com/drive/folders/18Ll-3bAmi4CR2eGTuM-j6fkMrSAaBV4Z?usp=sharing "網址")，下載完的 model_ctw_r101.pth 複製到       TextFuseNet/out_dir_r101/ctw1500_model/資料夾中，待檢測資料放到 TextFuseNet/input_images 中
 接著執行 demo/ctw1500_detection.py
 ```python
 python demo/ctw1500_detection.py
